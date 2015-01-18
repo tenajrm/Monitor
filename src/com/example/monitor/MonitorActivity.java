@@ -1,7 +1,9 @@
 package com.example.monitor;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
@@ -45,9 +47,9 @@ public class MonitorActivity extends FragmentActivity implements
 		
 		swipeContainer.setOnRefreshListener(new OnRefreshListListener());
 		swipeContainer.setColorSchemeResources(R.color.red, 
+	                R.color.yellow, 
 	                R.color.red, 
-	                R.color.red, 
-	                R.color.red);
+	                R.color.yellow);
 		
 	}
 	
@@ -85,6 +87,7 @@ public class MonitorActivity extends FragmentActivity implements
 	
 	
 	private void sumaryEarthquakeHttpRequest() {
+		final RequestQueue queue = ConnectionContoller.getInstance().getRequestQueue();
 		
 		JsonObjectRequest jsonObjReq = new JsonObjectRequest(Method.GET,
                 Config.URL, null,
@@ -93,12 +96,11 @@ public class MonitorActivity extends FragmentActivity implements
 		public void onResponse(JSONObject response) {
 				try {
 					Log.i(Config.TAG, response.toString());
-					
 					earthquakeListFragment.setList(response);
 					
 				} catch (Exception e) {
 					e.printStackTrace();
-					Log.i(TAG_REQUEST, "Error");
+					Log.i(TAG_REQUEST, "Error Exception");
 				}
 				
 			}
@@ -106,7 +108,20 @@ public class MonitorActivity extends FragmentActivity implements
 
 			@Override
             public void onErrorResponse(VolleyError error) {
-                VolleyLog.d(TAG_REQUEST, "Error: " + error.getMessage()); 
+                VolleyLog.d(TAG_REQUEST, "ErrorListener: " + error.getMessage()); 
+                if(queue.getCache().get(Config.URL)!=null){
+                	String cachedResponse = new String(queue.getCache().get(Config.URL).data);
+                	Log.i(TAG_REQUEST, "Cache :"+cachedResponse);
+                	try {
+						JSONObject cache = new JSONObject(cachedResponse);
+						earthquakeListFragment.setList(cache);
+					} catch (JSONException e) {
+						
+						e.printStackTrace();
+					}
+                	
+                }
+                
             }
 		});
 		
