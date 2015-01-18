@@ -1,9 +1,6 @@
 package com.example.fragment;
 
-import java.text.Format;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,6 +10,7 @@ import com.example.datamodel.AdapterData;
 import com.example.datamodel.SumaryDataContainer;
 import com.example.monitor.R;
 import com.example.utils.Config;
+import com.example.utils.Util;
 
 import android.app.Activity;
 import android.graphics.Color;
@@ -134,30 +132,22 @@ public class EarthquakeListviewFragment extends Fragment{
 					coordinates = geometry.getJSONArray("coordinates");
 					dataItem.setTitle(properties.getString("title"));
 					dataItem.setPlace(properties.getString("place"));
+					
+					//set Long and Lat and depth
 					dataItem.setLongitude(coordinates.getDouble(0));
 					dataItem.setLatitude(coordinates.getDouble(1));
 					dataItem.setDepth(coordinates.getDouble(2));
+					
 					dataItem.setType(properties.getString("type"));
 					
-					double mag = properties.getDouble("mag");
-					//set color according magnitude
-					if(mag >= 0 && mag < 0.9){
-						//yellow color
-						dataItem.setColor(getResources().getColor(R.color.yellow));
-					} else if(mag >= 0.9 && mag < 9){
-						//green color
-						dataItem.setColor(getResources().getColor(R.color.green));
-					} else if(mag >= 9 && mag <= 9.9){
-						//red color
-						dataItem.setColor(getResources().getColor(R.color.red));
-					}
+					double mag = properties.getDouble("mag");		
+					int color = Util.getColor(mag);
+					//set color and Magnitude
+					dataItem.setColor(getResources().getColor(color));
 					dataItem.setMagnitude(mag);
 					
 					//Conver long to date format 
-					long time = properties.getLong("time"); 
-					Date date = new Date(time);
-					Format format = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
-					dataItem.setTime(format.format(date));
+					dataItem.setTime(Util.convertDateToStringDate(properties.getLong("time")));
 					
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
